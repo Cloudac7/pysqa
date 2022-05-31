@@ -2,6 +2,9 @@
 # Copyright (c) Max-Planck-Institut für Eisenforschung GmbH - Computational Materials Design (CM) Department
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
+import pandas as pd
+
+
 __author__ = "Jan Janssen"
 __copyright__ = (
     "Copyright 2019, Max-Planck-Institut für Eisenforschung GmbH - "
@@ -17,7 +20,11 @@ __date__ = "Feb 9, 2019"
 class LsfCommands(object):
     @property
     def submit_job_command(self):
-        return ["bsub", "-terse"]
+        return ["bsub"]
+
+    @property
+    def stdin_as_input(self):
+        return True
 
     @property
     def delete_job_command(self):
@@ -29,12 +36,32 @@ class LsfCommands(object):
 
     @property
     def get_queue_status_command(self):
-        return ["qstat", "-x"]
+        return ["bjobs", "-noheader", "-o", "'id user stat name delimiter=\"|\"'"]
 
     @staticmethod
     def get_job_id_from_output(queue_submit_output):
-        raise NotImplementedError()
+        return int(queue_submit_output.split()[1][1:-1])
 
     @staticmethod
     def convert_queue_status(queue_status_output):
-        raise NotImplementedError()
+        line_split_lst = [line.split('|') for line in queue_status_output.splitlines()]
+        if len(line_split_lst) != 0:
+            job_id_lst, user_lst, status_lst, job_name_lst = zip(
+                *[
+                    (int(jobid), user, status.lower(), jobname)
+                    for jobid, user, status, jobname in line_split_lst
+                ]
+            )
+        else:
+            job_id_lst, user_lst, status_lst, job_name_lst = [], [], [], []
+        df = pandas.DataFrame(
+            {
+                "jobid": job_id_lst,
+                "user": user_lst,
+                "jobname": job_name_lst,
+                "status": status_lst,
+            }
+        )
+        df.loc[df.status == "RUN", "status"] = "running"
+        df.loc[df.status == "PEND", "status"] = "pending"
+        return df

@@ -150,11 +150,21 @@ class BasisQueueAdapter(object):
             run_time_max=run_time_max,
             command=command,
         )
-        out = self._execute_command(
-            commands=self._commands.submit_job_command + [queue_script_path],
-            working_directory=working_directory,
-            split_output=False,
-        )
+        # For LSF, scripts should be passed as stdin
+        if getattr(self._commands, 'stdin_as_input', True):
+            with open(os.path.join(working_directory, queue_script_path)) as f:
+                out = self._execute_command(
+                    commands=self._commands.submit_job_command,
+                    working_directory=working_directory,
+                    split_output=False,
+                    stdin=f
+                )
+        else:
+            out = self._execute_command(
+                commands=self._commands.submit_job_command + [queue_script_path],
+                working_directory=working_directory,
+                split_output=False,
+            )
         if out is not None:
             return self._commands.get_job_id_from_output(out)
         else:
@@ -399,7 +409,7 @@ class BasisQueueAdapter(object):
 
     @staticmethod
     def _execute_command(
-        commands, working_directory=None, split_output=True, shell=False
+        commands, working_directory=None, split_output=True, shell=False, stdin=None
     ):
         """
 
@@ -408,6 +418,7 @@ class BasisQueueAdapter(object):
             working_directory (str):
             split_output (bool):
             shell (bool):
+            stdin (None):
 
         Returns:
             str:
@@ -418,6 +429,7 @@ class BasisQueueAdapter(object):
             out = subprocess.check_output(
                 commands,
                 cwd=working_directory,
+                stdin=stdin,
                 stderr=subprocess.STDOUT,
                 universal_newlines=True,
                 shell=not isinstance(commands, list),

@@ -125,11 +125,12 @@ class TestRunmode(unittest.TestCase):
             self.torque._adapter._commands.get_queue_status_command, ["qstat", "-x"]
         )
         self.assertEqual(
-            self.lsf._adapter._commands.submit_job_command, ["bsub", "-terse"]
+            self.lsf._adapter._commands.submit_job_command, ["bsub"]
         )
         self.assertEqual(self.lsf._adapter._commands.delete_job_command, ["bkill"])
         self.assertEqual(
-            self.lsf._adapter._commands.get_queue_status_command, ["qstat", "-x"]
+            self.lsf._adapter._commands.get_queue_status_command, 
+            ["bjobs", "-noheader", "-o", "'id user stat name delimiter=\"|\"'"]
         )
         self.assertEqual(
             self.slurm._adapter._commands.submit_job_command, ["sbatch", "--parsable"]

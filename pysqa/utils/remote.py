@@ -24,6 +24,7 @@ class RemoteQueueAdapter(BasisQueueAdapter):
         self._ssh_local_path = os.path.abspath(
             os.path.expanduser(config["ssh_local_path"])
         )
+        self._ssh_remote_python_path = config.get("ssh_remote_python_path", "python")
         if "ssh_delete_file_on_remote" in config.keys():
             self._ssh_delete_file_on_remote = config["ssh_delete_file_on_remote"]
         else:
@@ -109,7 +110,8 @@ class RemoteQueueAdapter(BasisQueueAdapter):
         )
         remote_dict = json.loads(
             self._execute_remote_command(
-                command="python -m pysqa.cmd --list --working_directory "
+                command=self._ssh_remote_python_path
+                + " -m pysqa.cmd --list --working_directory "
                 + remote_working_directory
             )
         )
@@ -184,7 +186,8 @@ class RemoteQueueAdapter(BasisQueueAdapter):
 
     def _remote_command(self):
         return (
-            "python -m pysqa.cmd --config_directory "
+            self._ssh_remote_python_path
+            + " -m pysqa.cmd --config_directory "
             + self._ssh_remote_config_dir
             + " "
         )

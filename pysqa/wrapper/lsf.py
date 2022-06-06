@@ -2,7 +2,7 @@
 # Copyright (c) Max-Planck-Institut für Eisenforschung GmbH - Computational Materials Design (CM) Department
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
-import pandas as pd
+import pandas
 
 
 __author__ = "Jan Janssen"
@@ -36,7 +36,7 @@ class LsfCommands(object):
 
     @property
     def get_queue_status_command(self):
-        return ["bjobs", "-noheader", "-o", "'id user stat name delimiter=\"|\"'"]
+        return ["bjobs", "-noheader", "-o", "id user stat name delimiter=\"|\""]
 
     @staticmethod
     def get_job_id_from_output(queue_submit_output):
@@ -45,7 +45,7 @@ class LsfCommands(object):
     @staticmethod
     def convert_queue_status(queue_status_output):
         line_split_lst = [line.split('|') for line in queue_status_output.splitlines()]
-        if len(line_split_lst) != 0:
+        if len(line_split_lst) != 0 and line_split_lst[0][0] != 'No unfinished job found':
             job_id_lst, user_lst, status_lst, job_name_lst = zip(
                 *[
                     (int(jobid), user, status.lower(), jobname)
@@ -62,6 +62,6 @@ class LsfCommands(object):
                 "status": status_lst,
             }
         )
-        df.loc[df.status == "RUN", "status"] = "running"
-        df.loc[df.status == "PEND", "status"] = "pending"
+        df.loc[df.status == "run", "status"] = "running"
+        df.loc[df.status == "pend", "status"] = "pending"
         return df

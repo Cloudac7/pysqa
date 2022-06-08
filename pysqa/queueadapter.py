@@ -107,6 +107,15 @@ class QueueAdapter(object):
         return self._adapter.remote_flag
 
     @property
+    def remote_python_path(self):
+        """
+
+        Returns:
+            string:
+        """
+        return self._adapter._ssh_remote_python_path
+
+    @property
     def queue_list(self):
         """
 

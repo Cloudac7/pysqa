@@ -70,7 +70,7 @@ class BasisQueueAdapter(object):
             self._commands = getattr(importlib.import_module(module_name), class_name)()
         self._queues = Queues(self.queue_list)
         self._remote_flag = False
-        self._local_python_path = self._config.get("python_path", "python")
+        self._python_path = self._config.get("python_path", "python")
         self._ssh_delete_file_on_remote = True
 
     @property

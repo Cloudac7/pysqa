@@ -186,7 +186,7 @@ class RemoteQueueAdapter(BasisQueueAdapter):
 
     def _remote_command(self):
         return (
-            self._ssh_remote_python_path
+            self._python_path
             + " -m pysqa.cmd --config_directory "
             + self._ssh_remote_config_dir
             + " "

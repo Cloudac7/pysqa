@@ -24,15 +24,9 @@ class RemoteQueueAdapter(BasisQueueAdapter):
         self._ssh_local_path = os.path.abspath(
             os.path.expanduser(config["ssh_local_path"])
         )
-        if "ssh_delete_file_on_remote" in config.keys():
-            self._ssh_delete_file_on_remote = config["ssh_delete_file_on_remote"]
-        else:
-            self._ssh_delete_file_on_remote = True
-        if "ssh_port" in config.keys():
-            self._ssh_port = config["ssh_port"]
-        else:
-            self._ssh_port = 22
-        self._ssh_continous_connection = "ssh_continous_connection" in config.keys()
+        self._ssh_delete_file_on_remote = config.get("ssh_delete_file_on_remote", True)
+        self._ssh_port = config.get("ssh_port", 22)
+        self._ssh_continous_connection = config.get("ssh_continous_connection", False)
         self._ssh_connection = None
         self._remote_flag = True
         self._python_path = config.get("ssh_remote_python_path", "python")
